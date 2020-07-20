@@ -1,37 +1,68 @@
 package budget;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-   static Scanner scanner = new Scanner(System.in);
+    public static Scanner scanner = new Scanner(System.in);
+    static boolean exit;
+    static BudgetManager budgetManager = new BudgetManager();
+
     public static void main(String[] args) {
-        ArrayList<String> items = inputItemList();
-        printItemList(items);
-        System.out.printf("\nTotal: $%.2f", calculateTotal(items));
-    }
-
-    public static ArrayList<String> inputItemList(){
-        ArrayList<String> items = new ArrayList<>();
-        while(scanner.hasNextLine()){
-            items.add(scanner.nextLine());
-        }
-        return items;
-    }
-
-    public static void printItemList(ArrayList<String> items){
-        for (String item : items){
-            System.out.println(item);
+        while (!exit) {
+            menu();
+            chooseAction();
         }
     }
 
-    public static float calculateTotal(ArrayList<String> items){
-        float total = 0.00f;
-        for (String item : items){
-            if (item.contains("$")){
-                total += Float.parseFloat(item.substring(item.lastIndexOf("$") + 1));
-            }
+    private static void menu() {
+        String menu = String.join("\n",
+                "Choose your action:",
+                "1) Add income",
+                "2) Add purchase",
+                "3) Show list of purchases",
+                "4) Balance",
+                "0) Exit"
+        );
+        System.out.println(menu);
+    }
+
+    private static void chooseAction() {
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        switch (choice) {
+            case 1:
+                addIncome();
+                break;
+            case 2:
+                addPurchase();
+                break;
+            case 3:
+                budgetManager.showPurchaseList();
+                break;
+            case 4:
+                budgetManager.showBalance();
+                break;
+            case 0:
+                exit();
         }
-        return total;
+    }
+
+    private static void addIncome() {
+        System.out.println("\nEnter income:");
+        float income = Float.parseFloat(scanner.nextLine());
+        budgetManager.addToBalance(income);
+    }
+
+    private static void addPurchase() {
+        System.out.println("\nEnter purchase name:");
+        String item = scanner.nextLine();
+        System.out.println("Enter its price:");
+        Float price = Float.parseFloat(scanner.nextLine());
+        budgetManager.addItem(item, price);
+    }
+
+    private static void exit() {
+        System.out.println("\nBye!");
+        exit = true;
     }
 }

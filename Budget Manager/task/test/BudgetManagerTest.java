@@ -3,7 +3,9 @@ import org.hyperskill.hstest.stage.StageTest;
 import org.hyperskill.hstest.testcase.CheckResult;
 import org.hyperskill.hstest.testcase.TestCase;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,68 +18,176 @@ public class BudgetManagerTest extends StageTest<String> {
     @Override
     public List<TestCase<String>> generate() {
         return List.of(
+
             new TestCase<String>()
-                .setInput(
-                    "Almond 250gm $35.43\n" +
-                        "LEGO DUPLO Town Farm Animals $10.10\n" +
-                        "Sensodyne Pronamel Toothpaste $19.74\n" +
-                        "Hershey's milk chocolate bars $8.54\n" +
-                        "Gildan LT $8.61\n")
-                .setAttach(
-                    "Almond 250gm $35.43\n" +
-                        "LEGO DUPLO Town Farm Animals $10.10\n" +
-                        "Sensodyne Pronamel Toothpaste $19.74\n" +
-                        "Hershey's milk chocolate bars $8.54\n" +
-                        "Gildan LT $8.61\n" +
-                        "\n" +
-                        "Total: $82,42\n"
-                )
+                .setInput("0\n")
+                .setCheckFunc(BudgetManagerTest::test1),
+
+            new TestCase<String>()
+                .setInput("0\n")
+                .setCheckFunc(BudgetManagerTest::test2),
+
+            new TestCase<String>()
+                .setInput("4\n0")
+                .setCheckFunc(BudgetManagerTest::test3),
+
+            new TestCase<String>()
+                .setInput("1\n400\n4\n1\n200\n4\n0")
+                .setCheckFunc(BudgetManagerTest::test4),
+
+            new TestCase<String>()
+                .setInput("3\n1\n600\n2\nRed Fuji Apple\n5.99\n2\nEggs\n3.99\n3\n4\n0")
+                .setCheckFunc(BudgetManagerTest::test5)
         );
     }
 
-    @Override
-    public CheckResult check(String reply, String attach) {
 
-        reply = reply.trim().toLowerCase();
-        String[] rightOutput = attach.toLowerCase().split("\n");
-
-        if (!reply.toLowerCase().contains("total")) {
+    //Checking program stop
+    private static CheckResult test1(String reply, String attach) {
+        if (!reply.contains("Bye!")) {
             return new CheckResult(false,
-                "Output should contain total amount of purchases");
+                "Your program should stop after choosing \"Exit\"");
         }
-
-        for (String s : rightOutput) {
-
-            //Skip last or empty line
-            if (s.contains("total") || s.equals(""))
-                continue;
-
-            if (!reply.contains(s)) {
-                return new CheckResult(false,
-                    "Output should contain purchase\n" + s);
-            }
-        }
-
-        Pattern pattern = Pattern.compile("total:\\s+\\$(\\d\\d?[.,]\\d\\d)");
-        Matcher matcher = pattern.matcher(reply);
-
-        if (matcher.find()) {
-            try {
-                String totalAmount = matcher.group(1);
-                double total = Double.parseDouble(totalAmount);
-                if (Math.abs(82.42 - total) > 0.0001)
-                    return new CheckResult(false,
-                        "Your total amount: $" + totalAmount + "\n" +
-                            "Expected: $82.42");
-            } catch (NumberFormatException ex) {
-                return new CheckResult(false,
-                    "Total amount should be a number");
-            }
-            return new CheckResult(true);
-        } else {
-            return new CheckResult(false,
-                "Total amount wasn't found.\n" +
-                    "It should look like: Total: $0.00");
-        }
+        return new CheckResult(true);
     }
+
+
+    //Checking menu
+    private static CheckResult test2(String reply, String attach) {
+        String[] menuPatterns = {"1)", "2)", "3)", "4)", "0)"};
+        for (String menuPattern : menuPatterns) {
+            if (!reply.contains(menuPattern)) {
+                return new CheckResult(false,
+                    "Your menu doesn't have item " + menuPattern);
+            }
+        }
+        return new CheckResult(true);
+    }
+
+
+    //Checking balance
+    private static CheckResult test3(String reply, String attach) {
+
+        String[] blocks = reply.split("\n(\n+)?\n");
+
+        if (blocks.length != 4) {
+            return new CheckResult(false,
+                "Your program shows wrong blocks of output. Expected: 4\n" +
+                    "You have: " + blocks.length + "\n" +
+                    "Make sure that you print an empty line after each chosen action");
+        }
+
+        String balance = blocks[1];
+
+        if (!balance.toLowerCase().contains("balance")) {
+            return new CheckResult(false,
+                "Your program should show balance after choosing 4th item");
+        }
+
+        Pattern doublePattern = Pattern.compile("\\d+[,.]\\d+");
+        Matcher matcher = doublePattern.matcher(balance);
+
+        if (!matcher.find()) {
+            return new CheckResult(false,
+                "Your balance should contain a number!");
+        }
+
+        double balanceDouble = Double.parseDouble(matcher.group());
+
+        if (Math.abs(balanceDouble - 0) > 0.0001) {
+            System.out.println(balance);
+            return new CheckResult(false,
+                "Balance should be $0.00 at the beginning");
+        }
+
+        return new CheckResult(true);
+    }
+
+
+    //Checking adding income
+    private static CheckResult test4(String reply, String attach) {
+
+        String[] blocks = reply.split("\n(\n+)?\n");
+
+        if (blocks.length != 10) {
+            return new CheckResult(false,
+                "Your program shows wrong blocks of output. Expected: 10\n" +
+                    "You have: " + blocks.length + "\n" +
+                    "Make sure that you print an empty line after each chosen action");
+        }
+
+        String balanceAfterFirstAddingIncome = blocks[3];
+
+        if (!balanceAfterFirstAddingIncome.contains("$400")) {
+            return new CheckResult(false,
+                "Balance is wrong after adding income!.\n" +
+                    "Expected:\n" +
+                    "Balance: $400.00\n" +
+                    "Your output:\n" + balanceAfterFirstAddingIncome);
+        }
+
+        return new CheckResult(true);
+    }
+
+
+    //Checking adding purchase
+    private static CheckResult test5(String reply, String attach) {
+
+        String[] blocks = reply.split("\n(\n+)?\n");
+
+        if (blocks.length != 14) {
+            return new CheckResult(false,
+                "Your program shows wrong blocks of output. Expected: 14\n" +
+                    "You have: " + blocks.length + "\n" +
+                    "Make sure that you print an empty line after each chosen action");
+        }
+
+        String emptyPurchaseList = blocks[1];
+
+        if (!emptyPurchaseList.contains("empty")) {
+            return new CheckResult(false,
+                "Purchase list should be empty at the beginning!");
+        }
+
+        String purchaseList = blocks[9];
+
+        String[][] purchases = {
+            {"Red Fuji Apple", "5.99"},
+            {"Eggs", "3.99"}
+        };
+
+        for (String[] purchase : purchases) {
+            if (!purchaseList.contains(purchase[0])) {
+                return new CheckResult(false,
+                    "Your purchase list doesn't contain \"" + purchase[0] + "\"");
+            }
+            if (!purchaseList.contains(purchase[1])) {
+                return new CheckResult(false,
+                    "Your purchase list doesn't have price of " + purchase[0]);
+            }
+        }
+
+        String balanceAfterAddingPurchases = blocks[11];
+
+        Pattern doublePattern = Pattern.compile("\\d+[,.]\\d+");
+        Matcher matcher = doublePattern.matcher(balanceAfterAddingPurchases);
+
+        if (!matcher.find()) {
+            return new CheckResult(false,
+                "Your balance should contain a number!");
+        }
+
+        double balance = Double.parseDouble(matcher.group());
+
+        if (Math.abs(balance - 590.02) > 0.0001) {
+            return new CheckResult(false,
+                "Your balance should change after adding purchase.\n" +
+                    "Expected: Balance $590.02\n" +
+                    "Your output: " + balanceAfterAddingPurchases);
+        }
+
+        return new CheckResult(true);
+    }
+
+
 }
