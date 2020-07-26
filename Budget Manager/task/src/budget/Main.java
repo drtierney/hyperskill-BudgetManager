@@ -1,13 +1,17 @@
 package budget;
 
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Main {
     public static Scanner scanner = new Scanner(System.in);
     static boolean exit;
     static BudgetManager budgetManager = new BudgetManager();
+    static FileManager fileManager = new FileManager();
 
     public static void main(String[] args) {
+        java.util.Locale.setDefault(Locale.US);
+        //System.out.println(fileManager.getFile());
         while (!exit) {
             menu();
             chooseAction();
@@ -20,6 +24,8 @@ public class Main {
                 "2) Add purchase\n" +
                 "3) Show list of purchases\n" +
                 "4) Balance\n" +
+                "5) Save\n" +
+                "6) Load\n" +
                 "0) Exit");
     }
 
@@ -38,6 +44,12 @@ public class Main {
                 break;
             case 4:
                 budgetManager.showBalance();
+                break;
+            case 5:
+                fileManager.saveFile(budgetManager);
+                break;
+            case 6:
+                fileManager.loadFile(budgetManager);
                 break;
             case 0:
                 exit();
@@ -81,6 +93,7 @@ public class Main {
                 int itype = Integer.parseInt(type);
 
                 budgetManager.addItem(item, dprice, itype);
+                System.out.println("Purchase was added!");
             } catch (Exception e) {
                 System.out.println();
                 break;

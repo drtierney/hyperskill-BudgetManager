@@ -17,11 +17,13 @@ public class BudgetManager {
         System.out.println("Income was added!\n");
     }
 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     public void addItem(String item, double price, int type) {
         this.itemsList.add(new Item(item, price, type));
-        this.balance = Math.max(this.balance - price, 0.0f);
         this.total += price;
-        System.out.println("Purchase was added!");
     }
 
     public void showPurchaseList(String category) {
@@ -53,7 +55,7 @@ public class BudgetManager {
         System.out.println("All:");
         if (this.itemsList.size() > 0) {
             for (Item item : itemsList) {
-                System.out.printf("%s (%s) $%.2f\n", item.getName(), item.getCategory().toString(), item.getPrice());
+                System.out.printf("%s $%.2f\n", item.getName(), item.getPrice());
             }
             System.out.printf("Total sum: $%.2f\n", this.total);
         } else {
@@ -62,6 +64,14 @@ public class BudgetManager {
     }
 
     public void showBalance() {
-        System.out.printf("\nBalance: $%.2f\n\n", this.balance);
+        System.out.printf("\nBalance: $%.2f\n\n", this.balance - this.total);
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public ArrayList<Item> getItemsList() {
+        return itemsList;
     }
 }
