@@ -46,20 +46,20 @@ public class BudgetManager {
                 System.out.printf("Total sum: $%.2f\n", catTotal);
             }
         } else {
-            System.out.println("Purchase list is empty");
+            System.out.println("Purchase list is empty!");
         }
     }
 
     public void showPurchaseList() {
         System.out.println();
-        System.out.println("All:");
         if (this.itemsList.size() > 0) {
+            System.out.println("All:");
             for (Item item : itemsList) {
                 System.out.printf("%s $%.2f\n", item.getName(), item.getPrice());
             }
             System.out.printf("Total sum: $%.2f\n", this.total);
         } else {
-            System.out.println("Purchase list is empty\n");
+            System.out.println("Purchase list is empty!\n");
         }
     }
 
@@ -74,4 +74,83 @@ public class BudgetManager {
     public ArrayList<Item> getItemsList() {
         return itemsList;
     }
+
+    public void sortAllPurchases() {
+        if (this.itemsList.size() < 0) {
+            System.out.println("Purchase list is empty!");
+        } else {
+            itemsList.sort(new PriceSorter());
+            showPurchaseList();
+        }
+    }
+
+    public void SortAllTypes() {
+        itemsList.sort(new TypeSorter());
+        double sum = 0.00;
+        String[] types = {"Food", "Entertainment", "Clothes", "Other"};
+        for (String type : types) {
+            sum = 0.00;
+            ArrayList<Item> categoryList = new ArrayList<Item>();
+            for (Item item : itemsList) {
+                if (item.getCategory() == PurchaseCategory.valueOf(type.toUpperCase()))
+                    categoryList.add(item);
+            }
+            if (categoryList.size() > 0) {
+                for (Item item : categoryList) {
+                    sum += item.getPrice();
+                }
+            }
+            if (sum == 0.00){
+                System.out.printf("%s - $0\n", type);
+            } else {
+                System.out.printf("%s - $%.2f\n", type, sum);
+            }
+        } if (sum == 0.00) {
+            System.out.println("Total sum: $0\n");
+        } else {
+            System.out.printf("Total sum: $%.2f\n", this.total);
+        }
+    }
+
+
+    public void sortType(int type) {
+        if (this.itemsList.size() == 0) {
+            System.out.println("\nPurchase list is empty!\n");
+        } else {
+
+            String category = convertCategory(type);
+            double sum = 0.00;
+            ArrayList<Item> categoryList = new ArrayList<Item>();
+            for (Item item : itemsList) {
+                if (item.getCategory() == PurchaseCategory.valueOf(category.toUpperCase()))
+                    categoryList.add(item);
+            }
+            System.out.println();
+            if (categoryList.size() > 0) {
+                categoryList.sort(new PriceSorter());
+                for (Item item : categoryList) {
+                    System.out.printf("%s $%.2f\n", item.getName(), item.getPrice());
+                    sum += item.getPrice();
+                }
+                System.out.printf("Total sum: $%.2f\n", sum);
+            } else {
+                System.out.println("\nPurchase list is empty!\n");
+            }
+        }
+    }
+
+    private String convertCategory(int i) {
+        switch (i) {
+            case 1:
+                return "FOOD";
+            case 2:
+                return "CLOTHES";
+            case 3:
+                return "ENTERTAINMENT";
+            case 4:
+                return "OTHER";
+        }
+        return "";
+    }
+
 }

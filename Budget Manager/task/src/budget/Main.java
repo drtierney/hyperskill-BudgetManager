@@ -26,6 +26,7 @@ public class Main {
                 "4) Balance\n" +
                 "5) Save\n" +
                 "6) Load\n" +
+                "7) Analyze (Sort)\n" +
                 "0) Exit");
     }
 
@@ -50,6 +51,9 @@ public class Main {
                 break;
             case 6:
                 fileManager.loadFile(budgetManager);
+                break;
+            case 7:
+                chooseSort();
                 break;
             case 0:
                 exit();
@@ -79,7 +83,7 @@ public class Main {
 
             type = scanner.nextLine();
             System.out.println();
-            if (Integer.parseInt(type) >= 5 ){
+            if (Integer.parseInt(type) >= 5) {
                 System.out.println();
                 break;
             }
@@ -131,10 +135,45 @@ public class Main {
                         break;
                     case 5:
                         budgetManager.showPurchaseList();
+                        break;
                 }
             }
         }
     }
+
+    private static void chooseSort() {
+        while (true) {
+            System.out.println("\nHow do you want to sort?\n" +
+                    "1) Sort all purchases\n" +
+                    "2) Sort by type\n" +
+                    "3) Sort certain type\n" +
+                    "4) Back");
+            int method = Integer.parseInt(scanner.nextLine());
+                if (method == 4 || method < 1 || method > 4) {
+                    System.out.println();
+                    return;
+                } else {
+                    System.out.println();
+                    switch (method) {
+                        case 1:
+                            budgetManager.sortAllPurchases();
+                            break;
+                        case 2:
+                            budgetManager.SortAllTypes();
+                            break;
+                        case 3:
+                            System.out.println("\nChoose the type of purchase\n" +
+                                    "1) Food\n" +
+                                    "2) Clothes\n" +
+                                    "3) Entertainment\n" +
+                                    "4) Other");
+                            int type = Integer.parseInt(scanner.nextLine());
+                            budgetManager.sortType(type);
+                            break;
+                    }
+                }
+            }
+        }
 
     private static void exit() {
         System.out.print("\nBye!");
