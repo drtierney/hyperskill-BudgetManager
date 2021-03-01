@@ -2,7 +2,7 @@
 create your own personal budget manager program that counts the ins and outs and helps control the finances: work with strings, perform mathematical calculations and sort the data.  
 https://hyperskill.org/projects/76
 
-<img src="https://github.com/drtierney/hyperskill-BudgetManager/blob/master/BudgetManager.gif" width="800" height="400" />  
+<img src="https://github.com/drtierney/hyperskill-BudgetManager/blob/main/BudgetManager.gif" width="800" height="400" />  
 
 ## Syntax
 
